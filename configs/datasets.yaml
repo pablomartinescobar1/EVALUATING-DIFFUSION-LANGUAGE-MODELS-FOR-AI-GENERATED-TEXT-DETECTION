@@ -1,0 +1,23 @@
+# Registro central de datasets de detección de texto generado por IA.
+#
+# Para añadir un dataset nuevo: escribir un loader en src/aitext/datasets/<nombre>.py
+# que devuelva un DataFrame con columnas ["text", "label"] (label=1 humano, 0 IA) y
+# registrarlo aquí + en src/aitext/datasets/registry.py. Todas las estrategias/modelos/
+# clasificadores ya existentes funcionan automáticamente con el dataset nuevo.
+
+mage:
+  loader: mage
+  hf_id: yaful/MAGE
+  split: test
+  role: "MAGE (paper Table 2 / referencia [22])"
+
+raid:
+  loader: raid
+  split: train
+  role: "RAID, vía el paquete raid.utils.load_data (paper Table 3 / referencia [16])"
+
+deepfaketextdetect:
+  loader: deepfaketextdetect
+  hf_id: artem9k/ai-text-detection-pile
+  split: train
+  role: "DeepfakeTextDetect (paper Table 4 / referencia [23])"

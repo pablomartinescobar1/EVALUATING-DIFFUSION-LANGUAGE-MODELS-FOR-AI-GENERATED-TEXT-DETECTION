@@ -1,0 +1,28 @@
+# Genera la Tabla 5 del paper (análisis "parameter-controlled").
+#
+# OJO: llada_8b_base y llada_8b_vrpo son AMBOS modelos de 8B (ver nota en
+# configs/models.yaml sobre GSAI-ML/LLaDA-1.5). Esto ya no es una comparación
+# "small-scale" de difusión -- son dos variantes de 8B frente a Dream-LLaDA-7B.
+# La Sección 5.2 y la Tabla 5 del paper deben reescribirse en consecuencia.
+#
+# A diferencia del notebook original (FinalResultsLLADAs.ipynb), que solo corría
+# sobre MAGE con 1.000 muestras, este experimento cubre los 3 datasets a 10.000
+# muestras balanceadas, igual que los experimentos principales.
+name: llada_family
+datasets: [mage, raid, deepfaketextdetect]
+n_total: 10000
+seed: 41
+max_length: 512
+batch_size: 4
+
+models: [llada_8b_base, llada_8b_vrpo, dream_llada_7b]
+
+strategies:
+  score:
+    classifiers: [logreg, random_forest, xgboost, xgboost_calibrated]
+  pawn:
+    classifiers: [logreg, deep_mlp]
+  embedding:
+    classifiers: [logreg]
+
+output: results/tables/llada_family.csv

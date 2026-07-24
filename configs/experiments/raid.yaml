@@ -1,0 +1,19 @@
+# Genera la Tabla 3 del paper.
+name: raid
+dataset: raid
+n_total: 10000
+seed: 41
+max_length: 512
+batch_size: 4
+
+models: [llada_8b_base, gpt2, llama7b, gpt3_proxy, bert, roberta]
+
+strategies:
+  score:
+    classifiers: [logreg, random_forest, xgboost, xgboost_calibrated]
+  pawn:
+    classifiers: [logreg, deep_mlp]
+  embedding:
+    classifiers: [logreg]
+
+output: results/tables/raid.csv

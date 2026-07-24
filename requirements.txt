@@ -1,0 +1,22 @@
+# Core
+torch
+transformers
+accelerate
+bitsandbytes
+datasets
+tqdm
+psutil
+pandas
+numpy
+pyyaml
+
+# Classifiers
+scikit-learn
+xgboost
+
+# RAID benchmark (not on a simple PyPI name -- install per
+# https://github.com/liamdugan/raid, e.g. `pip install raid-bench`)
+# raid-bench
+
+# Dev / tests
+pytest

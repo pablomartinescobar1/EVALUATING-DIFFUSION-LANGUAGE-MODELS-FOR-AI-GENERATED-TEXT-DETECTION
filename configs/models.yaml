@@ -1,0 +1,93 @@
+# Registro central de modelos evaluados como backbones de detección.
+#
+# Para añadir un modelo NUEVO de un paradigma ya soportado (autoregressive / masked_lm /
+# diffusion) basta con añadir una entrada aquí -- no hace falta tocar ningún .py.
+# Solo un paradigma genuinamente nuevo (p.ej. un modelo de otra familia) requiere una
+# clase nueva en src/aitext/models/.
+#
+# Campos:
+#   paradigm : autoregressive | masked_lm | diffusion
+#   hf_id    : identificador del checkpoint en Hugging Face
+#   params   : recuento de parámetros aproximado (para las tablas del paper, no se usa en código)
+#   role     : cómo se nombra/describe este modelo en el paper (documenta proxies/versiones)
+#   quantize_4bit : si se carga con BitsAndBytesConfig(load_in_4bit=True)
+#   pawn     : hiperparámetros propios de la extracción PAWN (solo difusión: mask_ratio, num_samples)
+#   quirks   : notas de implementación (p.ej. modelos que no aceptan attention_mask 2D)
+
+gpt2:
+  paradigm: autoregressive
+  hf_id: gpt2-large
+  params: "774M"
+  role: "GPT-2 (paper Table 1)"
+  quantize_4bit: false
+
+gpt3_proxy:
+  paradigm: autoregressive
+  hf_id: EleutherAI/gpt-neo-2.7B
+  params: "2.7B"
+  role: >
+    Proxy abierto de "GPT-3-medium". No es GPT-3 real: la API de OpenAI no expone
+    log-probs de vocabulario completo necesarios para Score/PAWN. Ver NOTES.md.
+  quantize_4bit: true
+
+llama7b:
+  paradigm: autoregressive
+  hf_id: NousResearch/Llama-2-7b-hf
+  params: "7B"
+  role: >
+    El paper lo llama "LLaMA-7B" pero el checkpoint real es LLaMA-2-7B, no LLaMA-1.
+    Ver NOTES.md.
+  quantize_4bit: true
+
+bert:
+  paradigm: masked_lm
+  hf_id: bert-base-uncased
+  params: "110M"
+  role: "BERT-base"
+  quantize_4bit: false
+
+roberta:
+  paradigm: masked_lm
+  hf_id: roberta-base
+  params: "125M"
+  role: "RoBERTa-base"
+  quantize_4bit: false
+
+llada_8b_base:
+  paradigm: diffusion
+  hf_id: GSAI-ML/LLaDA-8B-Base
+  params: "8B"
+  role: "LLaDA-8B (paper Table 1)"
+  quantize_4bit: true
+  pawn:
+    mask_ratio: 0.35
+    num_samples: 10
+
+llada_8b_vrpo:
+  paradigm: diffusion
+  hf_id: GSAI-ML/LLaDA-1.5
+  params: "8B"
+  role: >
+    ANTES etiquetado "LLaDA-1.5B" como si fuera un modelo de ~1.5B parámetros -- la ficha
+    del modelo en HF confirma que "LLaDA 1.5" es un refinamiento por VRPO de
+    LLaDA-8B-Instruct, es decir 8B parámetros reales, no un modelo pequeño. No hay
+    actualmente ningún checkpoint LLaDA de escala pequeña en este registro. Ver NOTES.md
+    -- la Sección 5.2 / Tabla 5 del paper debe reescribirse para reflejar esto: son dos
+    variantes de 8B (Base vs VRPO) frente a Dream-LLaDA-7B, no una comparación
+    "small-scale" de difusión.
+  quantize_4bit: true
+  pawn:
+    mask_ratio: 0.35
+    num_samples: 10
+
+dream_llada_7b:
+  paradigm: diffusion
+  hf_id: Dream-org/Dream-v0-Base-7B
+  params: "7B"
+  role: "Dream-LLaDA-7B"
+  quantize_4bit: true
+  accepts_2d_attention_mask: false
+  quirks: "No acepta attention_mask 2D; se le pasa solo input_ids al forward."
+  pawn:
+    mask_ratio: 0.35
+    num_samples: 10
