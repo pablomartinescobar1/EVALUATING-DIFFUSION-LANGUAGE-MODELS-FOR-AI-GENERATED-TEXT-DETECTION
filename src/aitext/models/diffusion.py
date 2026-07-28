@@ -22,6 +22,13 @@ import torch
 from transformers import AutoModel, AutoTokenizer, BitsAndBytesConfig
 
 from aitext.metrics.pawn import METRIC_NAMES, compute_pawn_metrics, sequence_log_likelihood
+from aitext.metrics.zero_shot import (
+    NO_CANDIDATES,
+    YES_CANDIDATES,
+    build_cloze_input_ids,
+    resolve_single_token_id,
+    yes_no_log_odds,
+)
 from aitext.models.base import ModelWrapper, autocast_context, iter_batches
 
 
@@ -63,6 +70,9 @@ class DiffusionModel(ModelWrapper):
             if getattr(self.tokenizer, "mask_token_id", None) is not None
             else self.tokenizer.vocab_size - 1
         )
+
+        self._yes_id = resolve_single_token_id(self.tokenizer, YES_CANDIDATES)
+        self._no_id = resolve_single_token_id(self.tokenizer, NO_CANDIDATES)
 
     def _tokenize(self, batch_texts: list[str]):
         return self.tokenizer(
@@ -151,3 +161,23 @@ class DiffusionModel(ModelWrapper):
             counts = mask.sum(dim=1).clamp(min=1)
             all_embeddings.extend((summed / counts).float().cpu().numpy())
         return np.array(all_embeddings)
+
+    def zero_shot_score(self, texts: list[str]) -> list[float]:
+        """Single deterministic forward pass at one fixed mask position -- unlike
+        pawn_metrics's Monte Carlo averaging over randomly chosen positions, there is
+        nothing stochastic to average over here (the answer slot is the same position
+        every time)."""
+        scores = []
+        for batch in iter_batches(texts, self.batch_size, desc=f"{self.name} zero_shot"):
+            ids_list = [
+                build_cloze_input_ids(self.tokenizer, text, self.mask_token_id, self.max_length)
+                for text in batch
+            ]
+            inputs = self.tokenizer.pad({"input_ids": ids_list}, return_tensors="pt", padding=True).to(
+                self.device
+            )
+            outputs = self._run_model(inputs["input_ids"], inputs["attention_mask"])
+            rows, positions = (inputs["input_ids"] == self.mask_token_id).nonzero(as_tuple=True)
+            logits_at_answer = outputs.logits[rows, positions, :]
+            scores.extend(yes_no_log_odds(logits_at_answer, self._yes_id, self._no_id))
+        return scores

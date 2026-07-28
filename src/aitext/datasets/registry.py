@@ -23,6 +23,8 @@ _LOADER_MODULES = {
     "mage": "aitext.datasets.mage",
     "raid": "aitext.datasets.raid",
     "deepfaketextdetect": "aitext.datasets.deepfake_text_detect",
+    "beemo": "aitext.datasets.beemo",
+    "m4gt_bench": "aitext.datasets.m4gt_bench",
 }
 
 

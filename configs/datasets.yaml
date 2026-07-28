@@ -20,4 +20,27 @@ deepfaketextdetect:
   loader: deepfaketextdetect
   hf_id: artem9k/ai-text-detection-pile
   split: train
-  role: "DeepfakeTextDetect (paper Table 4 / referencia [23])"
+  role: "DeepfakeTextDetect / ATDP (paper Table 4 / referencia [23])"
+
+beemo:
+  loader: beemo
+  hf_id: toloka/beemo
+  split: train
+  role: >
+    Beemo (petición del revisor, paper referencia [27]). Tabla ancha: se usan
+    human_output (humano) y model_output (IA) de las 2.187 filas; variantes editadas
+    (human_edits, llama-3.1-70b_edits, gpt-4o_edits) no se usan -- son texto de IA
+    editado, no una clase limpia. Pool natural ~2.187/2.187 -- confirmar con
+    value_counts() antes de fijar n_total en el experimento.
+
+m4gt_bench:
+  loader: m4gt_bench
+  hf_id: "d0rj/SemEval2024-task8 (config: subtaskA_monolingual)"
+  split: train
+  role: >
+    M4GT-Bench (petición del revisor, paper referencia [26]), vía mirror comunitario
+    -- el repo oficial mbzuai-nlp/M4GT-Bench solo distribuye por Google Drive/gdown.
+    Alcance reducido a solo inglés (subtaskA_monolingual, NO subtaskA_multilingual)
+    para mantener consistencia con el resto del pipeline (tokenizers, PAWN y el
+    prompt zero-shot son todos de inglés) -- ver NOTES.md. OJO: la convención de
+    labels en origen está invertida (0=humano, 1=máquina); el loader la voltea.

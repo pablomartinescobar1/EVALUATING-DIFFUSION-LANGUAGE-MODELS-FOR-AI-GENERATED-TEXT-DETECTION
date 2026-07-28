@@ -10,6 +10,13 @@ import torch
 from transformers import AutoModelForMaskedLM, AutoTokenizer
 
 from aitext.metrics.pawn import METRIC_NAMES, compute_pawn_metrics, sequence_log_likelihood
+from aitext.metrics.zero_shot import (
+    NO_CANDIDATES,
+    YES_CANDIDATES,
+    build_cloze_input_ids,
+    resolve_single_token_id,
+    yes_no_log_odds,
+)
 from aitext.models.base import ModelWrapper, autocast_context, iter_batches
 
 
@@ -31,6 +38,9 @@ class MaskedLMModel(ModelWrapper):
 
         self.tokenizer = AutoTokenizer.from_pretrained(hf_id)
         self.model = AutoModelForMaskedLM.from_pretrained(hf_id, torch_dtype=self.dtype).to(self.device).eval()
+
+        self._yes_id = resolve_single_token_id(self.tokenizer, YES_CANDIDATES)
+        self._no_id = resolve_single_token_id(self.tokenizer, NO_CANDIDATES)
 
     def _tokenize(self, batch_texts: list[str]):
         return self.tokenizer(
@@ -76,3 +86,19 @@ class MaskedLMModel(ModelWrapper):
             hidden_states = outputs.hidden_states[-1]
             all_embeddings.extend(hidden_states[:, 0, :].float().cpu().numpy())
         return np.array(all_embeddings)
+
+    def zero_shot_score(self, texts: list[str]) -> list[float]:
+        scores = []
+        mask_token_id = self.tokenizer.mask_token_id
+        for batch in iter_batches(texts, self.batch_size, desc=f"{self.name} zero_shot"):
+            ids_list = [
+                build_cloze_input_ids(self.tokenizer, text, mask_token_id, self.max_length) for text in batch
+            ]
+            inputs = self.tokenizer.pad({"input_ids": ids_list}, return_tensors="pt", padding=True).to(
+                self.device
+            )
+            outputs = self._run_model(inputs)
+            rows, positions = (inputs["input_ids"] == mask_token_id).nonzero(as_tuple=True)
+            logits_at_answer = outputs.logits[rows, positions, :]
+            scores.extend(yes_no_log_odds(logits_at_answer, self._yes_id, self._no_id))
+        return scores

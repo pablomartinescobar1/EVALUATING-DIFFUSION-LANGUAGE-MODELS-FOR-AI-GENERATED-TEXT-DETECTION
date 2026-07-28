@@ -1,0 +1,27 @@
+# Genera la tabla de Beemo del paper (petición del revisor).
+#
+# n_total es PROVISIONAL: el pool natural de Beemo es ~2.187 humano / ~2.187 IA
+# (ver configs/datasets.yaml). Antes de la corrida grande, verifica el
+# value_counts() real -- si clean_text_column() descarta filas de forma asimétrica,
+# balanced_sample() fallará alto indicando el máximo real alcanzable; ajusta
+# n_total a 2 * min(humano, IA) si difiere de 4374.
+name: beemo
+dataset: beemo
+n_total: 4374
+seed: 41
+max_length: 512
+batch_size: 4
+
+models: [llada_8b_base, gpt2, llama2_7b, llama3_1_8b, gpt3_proxy, bert, roberta, modernbert]
+
+strategies:
+  score:
+    classifiers: [logreg, random_forest, xgboost, xgboost_calibrated]
+  pawn:
+    classifiers: [logreg, deep_mlp]
+  embedding:
+    classifiers: [logreg]
+  zero_shot:
+    classifiers: [prompt]
+
+output: results/tables/beemo.csv

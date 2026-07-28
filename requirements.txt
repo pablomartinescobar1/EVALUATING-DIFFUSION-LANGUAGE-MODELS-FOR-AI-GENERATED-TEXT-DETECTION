@@ -1,6 +1,6 @@
 # Core
 torch
-transformers
+transformers>=4.48  # ModernBERT support (answerdotai/ModernBERT-base)
 accelerate
 bitsandbytes
 datasets

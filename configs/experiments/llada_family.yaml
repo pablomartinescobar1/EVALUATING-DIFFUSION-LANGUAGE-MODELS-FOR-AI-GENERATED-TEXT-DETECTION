@@ -24,5 +24,7 @@ strategies:
     classifiers: [logreg, deep_mlp]
   embedding:
     classifiers: [logreg]
+  zero_shot:
+    classifiers: [prompt]
 
 output: results/tables/llada_family.csv

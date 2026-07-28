@@ -1,12 +1,15 @@
-"""Two reusable evaluation harnesses shared by every strategy:
+"""Three reusable evaluation harnesses shared by every strategy:
 
 - `cross_validated_eval`: 5-fold StratifiedKFold cross-validation, used by Strategy 1
   (global score) -- matches how the original notebooks evaluated that strategy.
 - `holdout_eval`: a single 80/20 stratified split with StandardScaler, used by
   Strategy 2 (PAWN) and Strategy 3 (embeddings) -- matches the original notebooks'
   single train_test_split + StandardScaler + fit/eval.
+- `direct_score_eval`: no split, no fit -- used by Strategy 4 (zero-shot), where the
+  "score" is the model's own prompted judgement rather than anything trained on this
+  dataset, so there is nothing to hold data out against.
 
-Keeping these as two shared functions (instead of duplicating the split/scale/fit/
+Keeping these as shared functions (instead of duplicating the split/scale/fit/
 score boilerplate inside every strategy module, as the original notebooks did 3-6
 times each) is what makes adding a new strategy or classifier a small, local change.
 """
@@ -22,8 +25,8 @@ from aitext.classifiers.registry import make_classifier
 METRIC_KEYS = ["roc_auc", "accuracy", "f1", "recall", "precision"]
 
 
-def _evaluate_probs(y_true: np.ndarray, y_prob: np.ndarray) -> dict[str, float]:
-    y_pred = (y_prob >= 0.5).astype(int)
+def _evaluate_probs(y_true: np.ndarray, y_prob: np.ndarray, threshold: float = 0.5) -> dict[str, float]:
+    y_pred = (y_prob >= threshold).astype(int)
     return {
         "roc_auc": roc_auc_score(y_true, y_prob) if len(set(y_true.tolist())) > 1 else float("nan"),
         "accuracy": accuracy_score(y_true, y_pred),
@@ -66,3 +69,12 @@ def holdout_eval(
     clf.fit(X_train, y_train)
     y_prob = clf.predict_proba(X_test)[:, 1]
     return _evaluate_probs(y_test, y_prob)
+
+
+def direct_score_eval(scores: np.ndarray, labels: np.ndarray, threshold: float = 0.0) -> dict[str, float]:
+    """Strategy 4 harness: evaluates a raw signed score directly against 100% of the
+    labels -- no fit, no train/test split, since nothing is being fit to this
+    dataset. `threshold` defaults to 0.0 rather than 0.5 because `scores` here are a
+    log-odds difference (positive/negative), not a calibrated [0,1] probability;
+    roc_auc itself is threshold-invariant either way."""
+    return _evaluate_probs(np.asarray(labels), np.asarray(scores), threshold=threshold)

@@ -30,13 +30,27 @@ gpt3_proxy:
     log-probs de vocabulario completo necesarios para Score/PAWN. Ver NOTES.md.
   quantize_4bit: true
 
-llama7b:
+llama2_7b:                # antes "llama7b" -- ver NOTES.md #7 y sección "Ampliación post-revisión"
   paradigm: autoregressive
   hf_id: NousResearch/Llama-2-7b-hf
   params: "7B"
   role: >
-    El paper lo llama "LLaMA-7B" pero el checkpoint real es LLaMA-2-7B, no LLaMA-1.
-    Ver NOTES.md.
+    El paper lo llamaba "LLaMA-7B" pero el checkpoint real siempre fue LLaMA-2-7B, no
+    LLaMA-1 (NOTES.md #7). Renombrada la clave de "llama7b" a "llama2_7b" al añadir
+    llama3_1_8b, para que la versión quede clara en las tablas sin tener que abrir
+    este archivo.
+  quantize_4bit: true
+
+llama3_1_8b:
+  paradigm: autoregressive
+  hf_id: meta-llama/Llama-3.1-8B
+  params: "8B"
+  role: >
+    Segundo LLM autorregresivo moderno (petición del revisor: "al menos un LLM más
+    moderno"). Checkpoint BASE (no -Instruct), igual que el resto del registro.
+    Repo GATED en HuggingFace: hace falta que la cuenta HF haya aceptado la licencia
+    de Meta Y que la máquina de GPU esté autenticada (huggingface-cli login o
+    HF_TOKEN) antes de from_pretrained -- no es un problema de código.
   quantize_4bit: true
 
 bert:
@@ -51,6 +65,17 @@ roberta:
   hf_id: roberta-base
   params: "125M"
   role: "RoBERTa-base"
+  quantize_4bit: false
+
+modernbert:
+  paradigm: masked_lm
+  hf_id: answerdotai/ModernBERT-base
+  params: "149M"
+  role: >
+    Añadido (petición del revisor) para que la comparación "modelo pequeño" no sea
+    exclusivamente encoders 2018-2023 (BERT/RoBERTa) frente a difusión 2025.
+    Requiere transformers>=4.48 (soporte ModernBERT). No necesita código nuevo:
+    AutoModelForMaskedLM lo carga igual que BERT/RoBERTa.
   quantize_4bit: false
 
 llada_8b_base:

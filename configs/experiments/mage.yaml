@@ -6,7 +6,7 @@ seed: 41
 max_length: 512
 batch_size: 4
 
-models: [llada_8b_base, gpt2, llama7b, gpt3_proxy, bert, roberta]
+models: [llada_8b_base, gpt2, llama2_7b, llama3_1_8b, gpt3_proxy, bert, roberta, modernbert]
 
 strategies:
   score:
@@ -15,5 +15,7 @@ strategies:
     classifiers: [logreg, deep_mlp]
   embedding:
     classifiers: [logreg]
+  zero_shot:
+    classifiers: [prompt]
 
 output: results/tables/mage.csv

@@ -1,0 +1,26 @@
+# Genera la tabla de M4GT-Bench del paper (petición del revisor).
+#
+# n_total es PROVISIONAL: el split "train" de subtaskA_monolingual tiene ~120.000
+# filas (ver configs/datasets.yaml), así que 10.000 balanceadas debería sobrar
+# margen de sobra, pero no se ha verificado el value_counts() real humano/máquina.
+# Ajusta n_total si balanced_sample() falla indicando menos filas disponibles.
+name: m4gt_bench
+dataset: m4gt_bench
+n_total: 10000
+seed: 41
+max_length: 512
+batch_size: 4
+
+models: [llada_8b_base, gpt2, llama2_7b, llama3_1_8b, gpt3_proxy, bert, roberta, modernbert]
+
+strategies:
+  score:
+    classifiers: [logreg, random_forest, xgboost, xgboost_calibrated]
+  pawn:
+    classifiers: [logreg, deep_mlp]
+  embedding:
+    classifiers: [logreg]
+  zero_shot:
+    classifiers: [prompt]
+
+output: results/tables/m4gt_bench.csv

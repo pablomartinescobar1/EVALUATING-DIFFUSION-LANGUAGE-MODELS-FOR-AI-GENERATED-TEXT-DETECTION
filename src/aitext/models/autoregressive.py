@@ -15,6 +15,14 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 from aitext.metrics.pawn import METRIC_NAMES, compute_pawn_metrics, sequence_log_likelihood
+from aitext.metrics.zero_shot import (
+    NO_CANDIDATES,
+    YES_CANDIDATES,
+    build_causal_prompt_ids,
+    last_real_position,
+    resolve_single_token_id,
+    yes_no_log_odds,
+)
 from aitext.models.base import ModelWrapper, autocast_context, iter_batches
 
 
@@ -50,6 +58,9 @@ class AutoregressiveModel(ModelWrapper):
 
         if self.tokenizer.pad_token_id >= self.model.config.vocab_size:
             self.model.resize_token_embeddings(len(self.tokenizer))
+
+        self._yes_id = resolve_single_token_id(self.tokenizer, YES_CANDIDATES)
+        self._no_id = resolve_single_token_id(self.tokenizer, NO_CANDIDATES)
 
     def _tokenize(self, batch_texts: list[str]):
         return self.tokenizer(
@@ -100,3 +111,16 @@ class AutoregressiveModel(ModelWrapper):
             for row, seq_len in enumerate(seq_lengths):
                 all_embeddings.append(hidden_states[row, seq_len, :].float().cpu().numpy())
         return np.array(all_embeddings)
+
+    def zero_shot_score(self, texts: list[str]) -> list[float]:
+        scores = []
+        for batch in iter_batches(texts, self.batch_size, desc=f"{self.name} zero_shot"):
+            ids_list = [build_causal_prompt_ids(self.tokenizer, text, self.max_length) for text in batch]
+            inputs = self.tokenizer.pad({"input_ids": ids_list}, return_tensors="pt", padding=True).to(
+                self.device
+            )
+            outputs = self._run_model(inputs)
+            positions = last_real_position(inputs["attention_mask"])
+            logits_at_answer = outputs.logits[torch.arange(positions.shape[0]), positions, :]
+            scores.extend(yes_no_log_odds(logits_at_answer, self._yes_id, self._no_id))
+        return scores
