@@ -30,11 +30,20 @@ def load_experiment_config(path: str | Path) -> dict:
         return yaml.safe_load(fh)
 
 
-def _feature_cache_path(dataset_name: str, model_name: str, strategy_name: str) -> Path:
+def _feature_cache_path(
+    dataset_name: str, model_name: str, strategy_name: str, n_total: int, seed: int
+) -> Path:
+    """`n_total`/`seed` are part of the cache key, not just the dataset/model/strategy
+    name: they determine WHICH texts `balanced_sample` draws, so a cached file from a
+    different `n_total` (e.g. an ad hoc smaller run) or `seed` has a different length
+    or different underlying texts entirely. Without this, loading a stale cache from
+    a smaller/differently-seeded run silently mismatches the current run's `labels`
+    array -- at best a length-mismatch crash downstream, at worst (same length,
+    different seed) silently misaligned texts and labels with no error at all."""
     directory = _FEATURES_DIR / dataset_name
     directory.mkdir(parents=True, exist_ok=True)
     suffix = "npy" if strategy_name == "embedding" else "csv"
-    return directory / f"{model_name}_{strategy_name}.{suffix}"
+    return directory / f"{model_name}_{strategy_name}_n{n_total}_s{seed}.{suffix}"
 
 
 def _save_features(cache_path: Path, strategy_name: str, features) -> None:
@@ -51,9 +60,15 @@ def _load_cached_features(cache_path: Path, strategy_name: str):
 
 
 def _extract_or_load_features(
-    model, model_name: str, dataset_name: str, strategy_name: str, texts: list[str]
+    model,
+    model_name: str,
+    dataset_name: str,
+    strategy_name: str,
+    texts: list[str],
+    n_total: int,
+    seed: int,
 ) -> tuple[Any, float, float, float, bool]:
-    cache_path = _feature_cache_path(dataset_name, model_name, strategy_name)
+    cache_path = _feature_cache_path(dataset_name, model_name, strategy_name, n_total, seed)
     if cache_path.exists():
         return _load_cached_features(cache_path, strategy_name), 0.0, 0.0, 0.0, True
 
@@ -86,7 +101,7 @@ def run_experiment(config: dict) -> pd.DataFrame:
 
             for strategy_name, strategy_cfg in strategies_config.items():
                 features, elapsed, vram_peak, cpu_delta, cached = _extract_or_load_features(
-                    model, model_name, dataset_name, strategy_name, texts
+                    model, model_name, dataset_name, strategy_name, texts, n_total, seed
                 )
                 performance_rows.append(
                     {

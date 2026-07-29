@@ -151,3 +151,18 @@ siendo una decisión tuya para el texto del paper.
     de difusión es caro (~6h/10k muestras por modelo, Tabla 9 del paper) y duplicar
     eso en 2 datasets más no se pidió explícitamente. Si se quiere, es un cambio de
     una línea (añadir a `datasets:`).
+
+18. **`transformers>=5.0` rompe la carga de LLaDA.** Al subir la cota mínima a
+    `>=4.48` (punto 3, para soportar ModernBERT) sin techo, un `pip install -U`
+    puede llevarte a `transformers` 5.x, que refactorizó cómo se gestionan los pesos
+    atados (`all_tied_weights_keys`/`post_init()`). El código remoto de LLaDA
+    (`trust_remote_code=True`, `modeling_llada.py`, sin actualizar por GSAI-ML desde
+    que se congeló contra una versión mucho más antigua de `transformers`) no expone
+    ese atributo nuevo y revienta con
+    `AttributeError: 'LLaDAModelLM' object has no attribute 'all_tied_weights_keys'`
+    en cuanto se activa la cuantización 4-bit. `requirements.txt` ahora fija
+    `transformers>=4.48,<5.0` para evitar la rama 5.x por completo -- si en el futuro
+    hace falta una versión de `transformers` que solo exista en 5.x por otro motivo,
+    esto es un conflicto genuino entre ModernBERT y LLaDA que habrá que resolver
+    (por ejemplo, dos entornos virtuales separados) en vez de una sola cota que sirva
+    para todo el registro de modelos.

@@ -1,6 +1,9 @@
 # Core
 torch
-transformers>=4.48  # ModernBERT support (answerdotai/ModernBERT-base)
+# >=4.48 for ModernBERT support; <5.0 because transformers v5's tied-weights refactor
+# (all_tied_weights_keys/post_init) breaks LLaDA's frozen trust_remote_code
+# modeling_llada.py with an AttributeError -- see NOTES.md.
+transformers>=4.48,<5.0
 accelerate
 bitsandbytes
 datasets
