@@ -1,4 +1,4 @@
-# Genera la Tabla 2 del paper.
+# Generates the paper's Table 2.
 name: mage
 dataset: mage
 n_total: 10000

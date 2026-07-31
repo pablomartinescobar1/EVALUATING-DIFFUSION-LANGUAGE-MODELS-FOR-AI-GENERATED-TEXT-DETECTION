@@ -19,3 +19,7 @@ results/tables/_*.csv
 # Model/dataset caches
 .cache/
 *.log
+
+# Internal working notes (paper-vs-code discrepancies, methodology admissions) --
+# kept locally for the authors, deliberately not part of the public repo.
+NOTES.md

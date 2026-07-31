@@ -2,7 +2,7 @@
 model and each strategy, extract features (cached to disk) and classify.
 
 This single function replaces the ad hoc, copy-pasted "Scores / PAWN / Embeddings /
-Clasificación" sections that used to be duplicated across
+Classification" sections that used to be duplicated across
 FinalResultsMAGE/RAID/DeepfakeTextDetect.ipynb (and, for the small-scale diffusion
 comparison, FinalResultsLLADAs.ipynb).
 """

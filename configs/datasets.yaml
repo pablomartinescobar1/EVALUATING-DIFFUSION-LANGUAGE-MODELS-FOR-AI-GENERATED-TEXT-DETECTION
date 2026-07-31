@@ -1,46 +1,47 @@
-# Registro central de datasets de detección de texto generado por IA.
+# Central registry of AI-generated text detection datasets.
 #
-# Para añadir un dataset nuevo: escribir un loader en src/aitext/datasets/<nombre>.py
-# que devuelva un DataFrame con columnas ["text", "label"] (label=1 humano, 0 IA) y
-# registrarlo aquí + en src/aitext/datasets/registry.py. Todas las estrategias/modelos/
-# clasificadores ya existentes funcionan automáticamente con el dataset nuevo.
+# To add a new dataset: write a loader in src/aitext/datasets/<name>.py that
+# returns a DataFrame with columns ["text", "label"] (label=1 human, 0 AI) and
+# register it here + in src/aitext/datasets/registry.py. Every existing
+# strategy/model/classifier automatically works with the new dataset.
 
 mage:
   loader: mage
   hf_id: yaful/MAGE
   split: test
-  role: "MAGE (paper Table 2 / referencia [22])"
+  role: "MAGE (paper Table 2 / reference [22])"
 
 raid:
   loader: raid
   split: train
-  role: "RAID, vía el paquete raid.utils.load_data (paper Table 3 / referencia [16])"
+  role: "RAID, via the raid.utils.load_data package (paper Table 3 / reference [16])"
 
 deepfaketextdetect:
   loader: deepfaketextdetect
   hf_id: artem9k/ai-text-detection-pile
   split: train
-  role: "DeepfakeTextDetect / ATDP (paper Table 4 / referencia [23])"
+  role: "DeepfakeTextDetect / ATDP (paper Table 4 / reference [23])"
 
 beemo:
   loader: beemo
   hf_id: toloka/beemo
   split: train
   role: >
-    Beemo (petición del revisor, paper referencia [27]). Tabla ancha: se usan
-    human_output (humano) y model_output (IA) de las 2.187 filas; variantes editadas
-    (human_edits, llama-3.1-70b_edits, gpt-4o_edits) no se usan -- son texto de IA
-    editado, no una clase limpia. Pool natural ~2.187/2.187 -- confirmar con
-    value_counts() antes de fijar n_total en el experimento.
+    Beemo (advisor's request, paper reference [27]). Wide table: human_output
+    (human) and model_output (AI) are used out of the 2,187 rows; edited variants
+    (human_edits, llama-3.1-70b_edits, gpt-4o_edits) are not used -- they are
+    edited AI text, not a clean class. Natural pool ~2,187/2,187 -- confirm with
+    value_counts() before fixing n_total in the experiment.
 
 m4gt_bench:
   loader: m4gt_bench
   hf_id: "d0rj/SemEval2024-task8 (config: subtaskA_monolingual)"
   split: train
   role: >
-    M4GT-Bench (petición del revisor, paper referencia [26]), vía mirror comunitario
-    -- el repo oficial mbzuai-nlp/M4GT-Bench solo distribuye por Google Drive/gdown.
-    Alcance reducido a solo inglés (subtaskA_monolingual, NO subtaskA_multilingual)
-    para mantener consistencia con el resto del pipeline (tokenizers, PAWN y el
-    prompt zero-shot son todos de inglés) -- ver NOTES.md. OJO: la convención de
-    labels en origen está invertida (0=humano, 1=máquina); el loader la voltea.
+    M4GT-Bench (advisor's request, paper reference [26]), via a community mirror --
+    the official mbzuai-nlp/M4GT-Bench repo only distributes via Google Drive/gdown.
+    Scope narrowed to English only (subtaskA_monolingual, NOT
+    subtaskA_multilingual) to stay consistent with the rest of the pipeline
+    (tokenizers, PAWN, and the zero-shot prompt are all English) -- see NOTES.md.
+    NOTE: the source label convention is inverted (0=human, 1=machine); the loader
+    flips it.

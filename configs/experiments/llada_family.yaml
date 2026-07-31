@@ -1,13 +1,14 @@
-# Genera la Tabla 5 del paper (análisis "parameter-controlled").
+# Generates the paper's Table 5 (the "parameter-controlled" analysis).
 #
-# OJO: llada_8b_base y llada_8b_vrpo son AMBOS modelos de 8B (ver nota en
-# configs/models.yaml sobre GSAI-ML/LLaDA-1.5). Esto ya no es una comparación
-# "small-scale" de difusión -- son dos variantes de 8B frente a Dream-LLaDA-7B.
-# La Sección 5.2 y la Tabla 5 del paper deben reescribirse en consecuencia.
+# NOTE: llada_8b_base and llada_8b_vrpo are BOTH 8B-parameter models (see the note
+# in configs/models.yaml about GSAI-ML/LLaDA-1.5). This is no longer a
+# "small-scale" diffusion comparison -- it's two 8B variants against
+# Dream-LLaDA-7B. Section 5.2 and Table 5 of the paper need to be rewritten
+# accordingly.
 #
-# A diferencia del notebook original (FinalResultsLLADAs.ipynb), que solo corría
-# sobre MAGE con 1.000 muestras, este experimento cubre los 3 datasets a 10.000
-# muestras balanceadas, igual que los experimentos principales.
+# Unlike the original notebook (FinalResultsLLADAs.ipynb), which only ran on MAGE
+# with 1,000 samples, this experiment covers all 3 datasets at 10,000 balanced
+# samples, matching the main experiments.
 name: llada_family
 datasets: [mage, raid, deepfaketextdetect]
 n_total: 10000

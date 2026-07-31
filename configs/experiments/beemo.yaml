@@ -1,10 +1,10 @@
-# Genera la tabla de Beemo del paper (petición del revisor).
+# Generates the paper's Beemo table (advisor's request).
 #
-# n_total es PROVISIONAL: el pool natural de Beemo es ~2.187 humano / ~2.187 IA
-# (ver configs/datasets.yaml). Antes de la corrida grande, verifica el
-# value_counts() real -- si clean_text_column() descarta filas de forma asimétrica,
-# balanced_sample() fallará alto indicando el máximo real alcanzable; ajusta
-# n_total a 2 * min(humano, IA) si difiere de 4374.
+# n_total is PROVISIONAL: Beemo's natural pool is ~2,187 human / ~2,187 AI (see
+# configs/datasets.yaml). Before the full run, verify the real value_counts() --
+# if clean_text_column() drops rows asymmetrically, balanced_sample() will raise
+# loudly reporting the real achievable maximum; adjust n_total to
+# 2 * min(human, AI) if it differs from 4374.
 name: beemo
 dataset: beemo
 n_total: 4374

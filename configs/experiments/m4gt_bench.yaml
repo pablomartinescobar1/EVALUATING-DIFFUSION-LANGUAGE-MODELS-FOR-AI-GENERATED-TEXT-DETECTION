@@ -1,9 +1,9 @@
-# Genera la tabla de M4GT-Bench del paper (petición del revisor).
+# Generates the paper's M4GT-Bench table (advisor's request).
 #
-# n_total es PROVISIONAL: el split "train" de subtaskA_monolingual tiene ~120.000
-# filas (ver configs/datasets.yaml), así que 10.000 balanceadas debería sobrar
-# margen de sobra, pero no se ha verificado el value_counts() real humano/máquina.
-# Ajusta n_total si balanced_sample() falla indicando menos filas disponibles.
+# n_total is PROVISIONAL: subtaskA_monolingual's "train" split has ~120,000 rows
+# (see configs/datasets.yaml), so 10,000 balanced should have plenty of headroom,
+# but the real human/machine value_counts() hasn't been verified. Adjust n_total
+# if balanced_sample() raises reporting fewer rows available.
 name: m4gt_bench
 dataset: m4gt_bench
 n_total: 10000
