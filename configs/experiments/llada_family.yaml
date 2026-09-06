@@ -14,7 +14,9 @@ datasets: [mage, raid, deepfaketextdetect]
 n_total: 10000
 seed: 41
 max_length: 512
-batch_size: 4
+batch_size: 2   # lowered from 4 after repeated CUDA OOM crashes on dream_llada_7b/score;
+                # does not affect the feature cache key (dataset+model+strategy+n_total+seed),
+                # so nothing already cached needs to be recomputed
 
 models: [llada_8b_base, llada_8b_vrpo, dream_llada_7b]
 

@@ -8,6 +8,7 @@ comparison, FinalResultsLLADAs.ipynb).
 """
 from __future__ import annotations
 
+import gc
 from pathlib import Path
 from typing import Any
 
@@ -121,6 +122,14 @@ def run_experiment(config: dict) -> pd.DataFrame:
                     result_rows.append({"dataset": dataset_name, "model": model_name, **row})
 
             del model
+            # `torch.cuda.empty_cache()` only returns already-freed blocks to the
+            # driver -- it does nothing for tensors still alive because of a
+            # reference cycle (common in HF model graphs) that `del` alone doesn't
+            # break. Without an explicit `gc.collect()` first, loading several large
+            # 4-bit models back-to-back in one process (as llada_family.yaml does:
+            # 3 diffusion models in a row) can accumulate un-released VRAM from
+            # earlier models until a later one no longer fits.
+            gc.collect()
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
