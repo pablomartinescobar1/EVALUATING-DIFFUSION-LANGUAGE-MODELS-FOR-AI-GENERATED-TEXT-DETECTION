@@ -2,11 +2,12 @@
 
 Support code for the paper *"Evaluating Diffusion Language Models for AI-Generated
 Text Detection: A Multi-Strategy, Multi-Dataset Analysis"*. Evaluates autoregressive
-models (GPT-2, LLaMA-2-7B, Llama-3.1-8B, a GPT-3 proxy), MLM models (BERT, RoBERTa,
-ModernBERT), and diffusion models (LLaDA-8B-Base, LLaDA-8B-VRPO, Dream-LLaDA-7B) as
-detection backbones under four strategies: global log-likelihood score, PAWN-style
-token-level metrics, embedding classification, and zero-shot classification via a
-fixed prompt. Datasets: MAGE, RAID, DeepfakeTextDetect (ATDP), Beemo, and M4GT-Bench.
+models (GPT-2, LLaMA-2-7B, Llama-3.1-8B, Qwen3-8B-Base, a GPT-3 proxy), MLM models
+(BERT, RoBERTa, ModernBERT), and diffusion models (LLaDA-8B-Base, LLaDA-8B-VRPO,
+Dream-LLaDA-7B) as detection backbones under four strategies: global log-likelihood
+score, PAWN-style token-level metrics, embedding classification, and zero-shot
+classification via a fixed prompt. Datasets: MAGE, RAID, DeepfakeTextDetect (ATDP),
+Beemo, and M4GT-Bench.
 
 ## Structure
 

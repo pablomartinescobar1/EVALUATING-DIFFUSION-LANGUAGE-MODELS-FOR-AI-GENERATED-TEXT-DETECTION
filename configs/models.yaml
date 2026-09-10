@@ -53,6 +53,26 @@ llama3_1_8b:
     from_pretrained -- not a code problem.
   quantize_4bit: true
 
+qwen3_8b:
+  paradigm: autoregressive
+  hf_id: Qwen/Qwen3-8B-Base
+  params: "8.2B"
+  role: >
+    Added (advisor's request) so LLaDA (~1.5 years old at review time) is compared
+    against at least one genuinely contemporary-or-earlier autoregressive model, not
+    only much older ones -- reviewer-proofing against "unfair comparison to stale
+    baselines". Deliberately the BASE checkpoint (Qwen/Qwen3-8B-Base), NOT
+    Qwen/Qwen3-8B (the instruct/chat checkpoint): Qwen3's "thinking" reasoning mode
+    is a chat-template feature (the `enable_thinking` flag passed to
+    apply_chat_template), which this project's pipeline never invokes for any model
+    (every _tokenize() call here feeds raw text straight to the tokenizer, no chat
+    formatting) -- but the base checkpoint has no chat template or thinking
+    machinery AT ALL, so "no thinking" is guaranteed structurally, not just by
+    omitting a flag. Also keeps it consistent with every other autoregressive entry
+    in this registry (gpt2/gpt3_proxy/llama2_7b/llama3_1_8b), all base checkpoints.
+    Requires transformers>=4.51 (Qwen3 support).
+  quantize_4bit: true
+
 bert:
   paradigm: masked_lm
   hf_id: bert-base-uncased

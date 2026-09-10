@@ -20,6 +20,7 @@ _PARADIGM_ORDER = {
     "gpt3_proxy": "Autoregressive",
     "llama2_7b": "Autoregressive",
     "llama3_1_8b": "Autoregressive",
+    "qwen3_8b": "Autoregressive",
     "bert": "Masked LM",
     "roberta": "Masked LM",
     "modernbert": "Masked LM",
@@ -37,7 +38,14 @@ _MAIN_DATASETS = ["mage", "raid", "deepfaketextdetect", "beemo", "m4gt_bench"]
 # NOTES.md), so these are two separate, internally-comparable groups rather than one
 # "small vs large" pair.
 _SMALL_ENCODER_MODELS = ["bert", "roberta", "modernbert"]
-_LARGE_MODEL_COMPARISON_MODELS = ["llama2_7b", "llama3_1_8b", "llada_8b_base", "llada_8b_vrpo", "dream_llada_7b"]
+_LARGE_MODEL_COMPARISON_MODELS = [
+    "llama2_7b",
+    "llama3_1_8b",
+    "qwen3_8b",
+    "llada_8b_base",
+    "llada_8b_vrpo",
+    "dream_llada_7b",
+]
 
 
 def _best_classifier_per_strategy(df: pd.DataFrame) -> pd.DataFrame:
@@ -134,10 +142,11 @@ def build_small_encoder_comparison_table() -> None:
 
 
 def build_large_model_comparison_table() -> None:
-    """Large-model comparison (~7-8B parameters): LLaMA-2-7B / Llama-3.1-8B
+    """Large-model comparison (~7-8B parameters): LLaMA-2-7B / Llama-3.1-8B / Qwen3-8B
     (autoregressive) vs. LLaDA-8B-Base / LLaDA-8B-VRPO / Dream-LLaDA-7B (diffusion)
     across all _MAIN_DATASETS -- unlike the small-encoder table above, this IS a
-    genuinely parameter-comparable group (every model here is 7-8B)."""
+    genuinely parameter-comparable group (every model here is 7-8B), and Qwen3-8B is
+    also the group's contemporary-to-LLaDA model (see configs/models.yaml)."""
     combined = _combined_main_results()
     if combined is None:
         print("[skip] no main dataset tables found yet -- run the main experiments first.")

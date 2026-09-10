@@ -81,9 +81,19 @@ def _extract_or_load_features(
     return features, elapsed, vram_peak, cpu_delta, False
 
 
+def _n_total_for(dataset_name: str, config: dict) -> int:
+    """Per-dataset `n_total`, falling back to the experiment's top-level default.
+    Lets one YAML mix datasets whose natural pool is too small for that default
+    (e.g. Beemo's ~4,374-row cap) with the rest, via an optional
+    `n_total_overrides: {dataset_name: n_total}` map -- see
+    configs/experiments/qwen3_8b.yaml for a worked example. Without an override,
+    every dataset uses the same top-level `n_total`, exactly like before."""
+    overrides = config.get("n_total_overrides", {})
+    return overrides.get(dataset_name, config["n_total"])
+
+
 def run_experiment(config: dict) -> pd.DataFrame:
     dataset_names = config.get("datasets") or [config["dataset"]]
-    n_total = config["n_total"]
     seed = config["seed"]
     max_length = config.get("max_length", 512)
     batch_size = config.get("batch_size", 4)
@@ -93,7 +103,8 @@ def run_experiment(config: dict) -> pd.DataFrame:
     performance_rows: list[dict[str, Any]] = []
 
     for dataset_name in dataset_names:
-        df = get_dataset(dataset_name, n_total=n_total, seed=seed)
+        dataset_n_total = _n_total_for(dataset_name, config)
+        df = get_dataset(dataset_name, n_total=dataset_n_total, seed=seed)
         texts = df["text"].tolist()
         labels = df["label"].values
 
@@ -102,7 +113,7 @@ def run_experiment(config: dict) -> pd.DataFrame:
 
             for strategy_name, strategy_cfg in strategies_config.items():
                 features, elapsed, vram_peak, cpu_delta, cached = _extract_or_load_features(
-                    model, model_name, dataset_name, strategy_name, texts, n_total, seed
+                    model, model_name, dataset_name, strategy_name, texts, dataset_n_total, seed
                 )
                 performance_rows.append(
                     {

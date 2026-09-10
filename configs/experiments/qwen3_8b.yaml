@@ -1,0 +1,41 @@
+# Runs qwen3_8b alone across all 5 main datasets (advisor's request -- see NOTES.md
+# #19-21). Beemo's natural pool caps out at 4374 (see beemo.yaml), not 10000 like
+# the other 4 -- handled via `n_total_overrides` (aitext.pipeline._n_total_for),
+# which lets one YAML mix per-dataset n_total instead of needing a second file.
+#
+# Writes to its own output file, NOT to mage.csv/raid.csv/etc., because
+# run_experiment() overwrites whatever `output` points to rather than merging into
+# it -- pointing this at the real per-dataset CSVs would destroy the other 8 models'
+# results already in them.
+#
+# This still ends up "properly in the CSVs": qwen3_8b's extracted features get
+# cached per (dataset, model, strategy) exactly like every other model
+# (results/features/<dataset>/qwen3_8b_<strategy>_n{n_total}_s41.*). The next time
+# you (re-)run the real mage.yaml/raid.yaml/deepfaketextdetect.yaml/beemo.yaml/
+# m4gt_bench.yaml, it will hit that cache for qwen3_8b (near-instant, no GPU work)
+# and cache-hit every other already-completed model too -- so re-running those 5
+# files as they are, with no changes, is actually the simplest way to get qwen3_8b
+# properly folded into the real per-dataset CSVs. This standalone file exists for
+# launching/inspecting qwen3_8b in isolation, not as a replacement for that step.
+name: qwen3_8b
+datasets: [mage, raid, deepfaketextdetect, m4gt_bench, beemo]
+n_total: 10000
+n_total_overrides:
+  beemo: 4374
+seed: 41
+max_length: 512
+batch_size: 4
+
+models: [qwen3_8b]
+
+strategies:
+  score:
+    classifiers: [logreg, random_forest, xgboost, xgboost_calibrated]
+  pawn:
+    classifiers: [logreg, deep_mlp]
+  embedding:
+    classifiers: [logreg]
+  zero_shot:
+    classifiers: [prompt]
+
+output: results/tables/_qwen3_8b.csv

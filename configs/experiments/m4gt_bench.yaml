@@ -11,7 +11,7 @@ seed: 41
 max_length: 512
 batch_size: 4
 
-models: [llada_8b_base, gpt2, llama2_7b, llama3_1_8b, gpt3_proxy, bert, roberta, modernbert]
+models: [llada_8b_base, gpt2, llama2_7b, llama3_1_8b, qwen3_8b, gpt3_proxy, bert, roberta, modernbert]
 
 strategies:
   score:
